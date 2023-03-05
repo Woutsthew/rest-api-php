@@ -12,8 +12,6 @@ class TodosModel {
   public function get(array $filter) : array {
     $query = "SELECT id, title, body FROM todos" . conditionsWhere($filter);
     $stmt = $this->db->prepare($query);
-    echo($query);
-    print_r($filter);
     if ($stmt->execute($filter) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
 
