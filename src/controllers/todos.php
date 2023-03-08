@@ -67,6 +67,7 @@ class TodosController {
     $title = isset($data['title']) ? $data['title'] : '';
     if (strlen($title) < 3) throw new Exception('title must be at least 3 characters', 422);
 
+    $data['image'] = uploadImage('image');
     $response['id'] = $this->model->create($data);
     http_response_code(201);
     return $response;

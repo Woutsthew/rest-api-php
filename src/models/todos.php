@@ -10,7 +10,7 @@ class TodosModel {
   }
 
   public function get(array $filter) : array {
-    $query = "SELECT id, title, body FROM todos" . conditionsWhere($filter);
+    $query = "SELECT id, title, image, body FROM todos" . conditionsWhere($filter);
     $stmt = $this->db->prepare($query);
     if ($stmt->execute($filter) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
@@ -19,7 +19,7 @@ class TodosModel {
   }
 
   public function getById(string $id) : array | object {
-    $query = "SELECT id, title, body FROM todos WHERE id = :id";
+    $query = "SELECT id, title, image, body FROM todos WHERE id = :id";
     $stmt = $this->db->prepare($query);
     if ($stmt->execute(['id' => $id]) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
