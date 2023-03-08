@@ -22,15 +22,14 @@ function fieldsUpdate(array $data) : string {
   return implode(", ", $set);
 }
 
-function uploadImage(string $key) : string {
-  $fileImage = isset($_FILES[$key]) ? $_FILES[$key] : null;
-  $image = 'default.png';
-  if ($fileImage !== null) {
-    $path = './uploads/images/';
-    if (is_dir($path) === false) mkdir($path, 0777, true);
-    $image = time() . '-' . $fileImage['name'];
-    if (move_uploaded_file($fileImage['tmp_name'], $path . $image) === false)
-      throw new Exception('Failed to download the file', 500);
-  }
+function uploadImage(?array $fileImage) : string {
+  if ($fileImage === null) return 'default.png';
+
+  $path = './uploads/images/';
+  if (is_dir($path) === false) mkdir($path, 0777, true);
+  $image = time() . '-' . $fileImage['name'];
+  if (move_uploaded_file($fileImage['tmp_name'], $path . $image) === false)
+    throw new Exception('Failed to download the file', 500);
+
   return $image;
 }

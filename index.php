@@ -17,9 +17,7 @@ function exceptionHandler(Throwable $exception) : void {
 }
 set_exception_handler('exceptionHandler');
 
-$urlParts = explode("/", explode("?", $_SERVER["REQUEST_URI"])[0]);
-$routes = $urlParts[1] ?? null;
-$resource = $urlParts[2] ?? null;
+$routes = explode("/", explode("?", $_SERVER["REQUEST_URI"])[0])[1] ?? null;
 $method = $_SERVER['REQUEST_METHOD'];
 $response = null;
 
@@ -29,7 +27,7 @@ switch ($routes) {
     require_once('./src/controllers/todos.php');
     $model = new TodosModel("localhost", "todos", "todos", "todos");
     $controller = new TodosController($model);
-    $response = $controller->processRequest($method, $resource);
+    $response = $controller->processRequest($method);
     break;
   case 'foo':
     throw new Exception('Not Implemented', 501);
