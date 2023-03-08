@@ -1,6 +1,7 @@
 <?php
 
 class TodosController {
+  private array $fields = ['title' => '', 'body' => '', 'isDelete' => ''];
   public function __construct(private TodosModel $model) {}
 
   public function processRequest(string $method, ?string $resource) : array | object {
@@ -22,6 +23,8 @@ class TodosController {
 
   private function updateResource(string $id) : array {
     $data = json_decode(file_get_contents('php://input'), true) ?? array();
+    $data = array_intersect_key($data, $this->fields);
+    if (empty($data)) throw new Exception('Fields not specified', 400);
     $response['id'] = $this->model->update($id, $data);
     return $response;
   }
@@ -35,7 +38,7 @@ class TodosController {
   private function processCollectionRequest(string $method) {
     switch ($method) {
       case 'GET': return $this->getCollection(); break;
-      case "POST": return $this->createResourceCollection(); break;
+      case 'POST': return $this->createResourceCollection(); break;
       default:
         header('Allow: GET, POST');
         throw new Exception('Method Not Allowed', 405);
@@ -45,8 +48,7 @@ class TodosController {
   private function getCollection() : array {
     $page = isset($_GET['page']) ? (int) $_GET['page'] : 0;
     $size = isset($_GET['size']) ? (int) $_GET['size'] : 20;
-    $filter = ['title' => '', 'body' => ''];
-    $filter = array_intersect_key($_GET, $filter);
+    $filter = array_intersect_key($_GET, $this->fields);
 
     $todos = $this->model->get($filter);
     $response['page'] = $page;
@@ -57,10 +59,16 @@ class TodosController {
   }
 
   private function createResourceCollection() : array {
-    $data = !empty($_POST) ? $_POST
-      : json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
+    $data = empty($data) ? $_POST : $data;
+    $data = array_intersect_key($data, $this->fields);
+    if (empty($data)) throw new Exception('Fields not specified', 400);
+
+    $title = isset($data['title']) ? $data['title'] : '';
+    if (strlen($title) < 3) throw new Exception('title must be at least 3 characters', 422);
 
     $response['id'] = $this->model->create($data);
+    http_response_code(201);
     return $response;
   }
 }

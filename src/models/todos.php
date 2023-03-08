@@ -29,7 +29,7 @@ class TodosModel {
   }
 
   public function create(array $data) : string {
-    $query = "INSERT INTO todos (title, body) VALUES (:title, :body)";
+    $query = "INSERT INTO todos " . fieldsCreate($data);
     $stmt = $this->db->prepare($query);
     if ($stmt->execute($data) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);

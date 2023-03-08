@@ -7,9 +7,17 @@ function conditionsWhere(array $filter) : string {
   return isset($where) ? " WHERE " . implode(" AND ", $where) : '';
 }
 
-function fieldsUpdate(array $fields) : string {
+function twoDotAdd ($key) { return ":" . $key; }
+function fieldsCreate(array $data) : string {
+  $keys = array_keys($data);
+  $fields = "(" . implode(", ", $keys) . ")";
+  $value = "(" . implode(", ", array_map('twoDotAdd', $keys)) . ")";
+  return $fields . " VALUES " . $value;
+}
+
+function fieldsUpdate(array $data) : string {
   $set = null;
-  foreach (array_keys($fields) as $key)
+  foreach (array_keys($data) as $key)
     $set[] = $key . " = :" . $key;
   return implode(", ", $set);
 }
