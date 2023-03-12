@@ -18,14 +18,14 @@ class TodosModel {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function getById(string $id) : array | object {
+  public function getById(string $id) : array {
     $query = "SELECT id, title, image, body FROM todos WHERE id = :id";
     $stmt = $this->db->prepare($query);
     if ($stmt->execute(['id' => $id]) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
 
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $item === false ? (object)[] : $item;
+    return $item === false ? [] : $item;
   }
 
   public function create(array $data) : string {
@@ -33,7 +33,7 @@ class TodosModel {
     $stmt = $this->db->prepare($query);
     if ($stmt->execute($data) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
-  
+
     return $this->db->lastInsertId();
   }
 
