@@ -17,7 +17,11 @@ class TodosController {
       case 'GET':
         $resource = $this->model->getById($id);
         if ($routes !== 'image') return $resource;
-        downloadFile($this->UPLOADS_IMAGES . $resource['image'] ??= ' ');
+
+        if (($resource['image'] ?? null) === null)
+          throw new Exception('Failed to download the file, file is not exists', 500);
+
+        downloadFile($this->UPLOADS_IMAGES, $resource['image']);
         break;
       case 'POST': if ($routes === 'image') return $this->updateImageResource($id); break;
       case 'PUT': throw new Exception('Not Implemented', 501); break;
@@ -40,7 +44,7 @@ class TodosController {
   private function updateImageResource(string $id) : array {
     $fileImage = $_FILES['image'] ??= null;
     if ($fileImage === null) throw new Exception('Image not specified', 400);
-    $data['image'] = uploadImage($this->UPLOADS_IMAGES, $fileImage);
+    $data['image'] = uploadFile($this->UPLOADS_IMAGES, $fileImage);
     $response['id'] = $this->model->update($id, $data);
     return $response;
   }
@@ -80,9 +84,12 @@ class TodosController {
     if (empty($data)) throw new Exception('Fields not specified', 400);
 
     $title = $data['title'] ?? '';
-    if (strlen($title) < 3) throw new Exception('title must be at least 3 characters', 422);
+    if (strlen($title) < 3)
+      throw new Exception('title must be at least 3 characters', 422);
+
     $fileImage = $_FILES['image'] ??= null;
-    $data['image'] = uploadImage($this->UPLOADS_IMAGES, $fileImage);
+    $data['image'] = $fileImage === null ? 'default.png'
+      : uploadFile($this->UPLOADS_IMAGES, $fileImage);
 
     $response['id'] = $this->model->create($data);
     http_response_code(201);

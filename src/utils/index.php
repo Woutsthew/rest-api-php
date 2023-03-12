@@ -22,19 +22,20 @@ function fieldsUpdate(array $data) : string {
   return implode(", ", $set);
 }
 
-function uploadImage(string $pathToSave, ?array $fileImage) : string {
-  if ($fileImage === null) return 'default.png';
-
+function uploadFile(string $pathToSave, array $file) : string {
   if (is_dir($pathToSave) === false) mkdir($pathToSave, 0777, true);
-  $image = time() . '-' . $fileImage['name'];
-  if (move_uploaded_file($fileImage['tmp_name'], $pathToSave . $image) === false)
+
+  $imageName = time() . '_' . $file['name'];
+  if (move_uploaded_file($file['tmp_name'], $pathToSave . $imageName) === false)
     throw new Exception('Failed to upload the file', 500);
 
-  return $image;
+  return $imageName;
 }
 
-function downloadFile(string $fileName) {
-  if (file_exists($fileName) === false)
+function downloadFile(string $pathToDirectory, string $fileName) : void {
+  $pathToFile = $pathToDirectory . $fileName;
+  die($pathToFile);
+  if (file_exists($pathToFile) === false)
     throw new Exception('Failed to download the file, file is not exists', 500);
 
   if (ob_get_level()) ob_end_clean();
@@ -42,11 +43,11 @@ function downloadFile(string $fileName) {
   header('Content-Description: File Transfer');
   header('Content-Type: application/octet-stream');
   header('Content-Transfer-Encoding: binary');
-  header('Content-Disposition: attachment; filename=' . basename($fileName));
-  header('Content-Length: ' . filesize($fileName));
+  header('Content-Disposition: attachment; filename=' . basename($pathToFile));
+  header('Content-Length: ' . filesize($pathToFile));
   header('Expires: 0');
   header('Pragma: public');
   header('Cache-Control: must-revalidate');
 
-  readfile($fileName);
+  readfile($pathToFile);
 }
