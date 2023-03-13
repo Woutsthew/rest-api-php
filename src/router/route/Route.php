@@ -11,33 +11,29 @@ class Route {
     $method = 'routes' . ucfirst(strtolower($_SERVER['REQUEST_METHOD']));
 
     foreach(self::$$method as $route) {
-      $r = self::clean($route->route);
-      $q = self::clean($_SERVER['REQUEST_URI']);
+      $routeURI = self::clean($route->route);
+      $requestURI = self::clean($_SERVER['REQUEST_URI']);
 
-      $rParam = [];
+      $requestURIArray = explode('/', $requestURI);
+      $args = [];
+      $regex = '/^:/';
 
-      foreach(explode('/', $r) as $key => $value) {
-        $regex = '/^:/';
-        if (preg_match($regex, $value))
-          $rParam[$key] = preg_replace($regex, '', $value);
+      foreach(explode('/', $routeURI) as $key => $value)
+        if (preg_match($regex, $value)) {
+          if (!isset($requestURIArray[$key])) return;
+          $args[preg_replace($regex, '', $value)] = $requestURIArray[$key];
+          $requestURIArray[$key] = ':.*';
+        }
+
+      $requestURI = str_replace('/', '\/', implode('/', $requestURIArray));
+
+      if (preg_match("/$requestURI/", $routeURI)) {
+        ($route->callback)(...$args);
+        exit;
       }
-
-      $qArr = explode('/', $q);
-      $rParamsRequest = [];
-
-      foreach($rParam as $key => $value) {
-        if (!isset($qArr[$key])) return;
-        $rParamsRequest[$value] = $qArr[$key];
-        $qArr[$key] = ':.*';
-      }
-
-      $q = str_replace('/', '\/', implode('/', $qArr));
-
-      if (preg_match("/$q/", $r))
-        ($route->callback)(...$rParamsRequest);
     }
 
-    die();
+    die('route not found');
   }
 
   static private function clean(string $string) {
