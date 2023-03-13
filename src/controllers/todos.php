@@ -6,8 +6,9 @@ class TodosController {
     echo 'all todos';
   }
 
-  public static function todosById(string $id) {
-    echo 'todo' . $id;
+  public static function todosById(string $id, string $qwe) {
+    echo 'todo ' . $id;
+    echo '   comment ' . $qwe;
   }
 
 }

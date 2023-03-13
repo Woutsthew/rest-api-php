@@ -1,6 +1,6 @@
 <?php
 
-class RouteConf {
+class _Route {
   public string $route;
   public array $callback;
 
