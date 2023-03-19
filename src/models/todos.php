@@ -9,8 +9,9 @@ class TodosModel {
     $this->db = new PDO($dsn, $user, $password);
   }
 
-  public function get(array $filter) : array {
-    $query = "SELECT id, title, image, body FROM todos" . conditionsWhere($filter);
+  public function read(array $filter) : array {
+    $query = "SELECT id, title, image, body FROM todos" . SQLBuilder::conditionsWhere($filter);
+
     $stmt = $this->db->prepare($query);
     if ($stmt->execute($filter) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
@@ -18,8 +19,9 @@ class TodosModel {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function getById(string $id) : array {
+  public function readById(string $id) : array {
     $query = "SELECT id, title, image, body FROM todos WHERE id = :id";
+
     $stmt = $this->db->prepare($query);
     if ($stmt->execute(['id' => $id]) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
@@ -29,7 +31,8 @@ class TodosModel {
   }
 
   public function create(array $data) : string {
-    $query = "INSERT INTO todos " . fieldsCreate($data);
+    $query = "INSERT INTO todos " . SQLBuilder::fieldsCreate($data);
+
     $stmt = $this->db->prepare($query);
     if ($stmt->execute($data) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
@@ -38,7 +41,8 @@ class TodosModel {
   }
 
   public function update(string $id, array $data) : string {
-    $query = "UPDATE todos SET " . fieldsUpdate($data) . " WHERE id = :id";
+    $query = "UPDATE todos SET " . SQLBuilder::fieldsUpdate($data) . " WHERE id = :id";
+
     $stmt = $this->db->prepare($query);
     $data['id'] = $id;
     if ($stmt->execute($data) === false)
@@ -50,6 +54,7 @@ class TodosModel {
   public function delete(string $id, bool $isStrong) : string {
     $query = $isStrong ? "DELETE FROM todos WHERE id = :id"
       : "UPDATE todos SET isDelete = true WHERE id = :id";
+
     $stmt = $this->db->prepare($query);
     if ($stmt->execute(['id' => $id]) === false)
       throw new Exception($stmt->errorInfo()[2], $stmt->errorInfo()[1]);
